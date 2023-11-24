@@ -1,0 +1,15 @@
+{
+  "name": "task-1",
+  "version": "1.0.0",
+  "description": "Task to workout API CRUD operations ",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node": "^21.2.0"
+  }
+}
