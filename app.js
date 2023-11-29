@@ -49,8 +49,11 @@ app.listen(PORT, () => {
 
 // DB CONNECTION
 db.connectDB((err) => {
-  if (err) console.log(err);
+  if (err){
+    console.log(err);
+  }else{
     console.log("DB Connected");
+  }
 })
 // opepration.create();
 

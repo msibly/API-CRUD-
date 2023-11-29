@@ -1,14 +1,14 @@
 const mysql = require("mysql");
-
+const config = require('./config');
 // Create a connection pool
 const pool = mysql.createPool({
   connectionLimit: 10, // Set the maximum number of connections
-  host: "127.0.0.1",
-  port: 3306,
-  user: "MM0824",
-  password: "Maven@0824",
-  database: 'taskOne',
-  authPlugin: "mysql_native_password",
+  host: config.host,
+  port: config.port,
+  user: config.uname,
+  password: config.password,
+  database: config.database,
+  authPlugin: config.authType,
 });
 
 module.exports = {
@@ -16,12 +16,12 @@ module.exports = {
     // Get a connection from the pool
     pool.getConnection((err, connection) => {
       if (err) {
-        console.error("error connecting: " + err.stack);
+        // console.error("error connecting: " + err.stack);
         callback(err);
         return;
+      }else{
+        console.log("Success");
       }
-      console.log("DB Connected");
-
       // Release the connection back to the pool when done
       connection.release();
       callback(null);
@@ -32,3 +32,5 @@ module.exports = {
     return pool;
   }
 };
+
+
