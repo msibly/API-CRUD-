@@ -16,7 +16,7 @@ function createAdmin(admin) {
     } catch (error) {
       resolve (error);
     }
-   })
+  })
 }
 
 //CREATE USER FUNCTION

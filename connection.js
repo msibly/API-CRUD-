@@ -1,5 +1,6 @@
 const mysql = require("mysql");
-const config = require('./config');
+const config = require("./config");
+
 // Create a connection pool
 const pool = mysql.createPool({
   connectionLimit: 10, // Set the maximum number of connections
@@ -16,21 +17,131 @@ module.exports = {
     // Get a connection from the pool
     pool.getConnection((err, connection) => {
       if (err) {
-        // console.error("error connecting: " + err.stack);
         callback(err);
         return;
-      }else{
-        console.log("Success");
+      } else {
+        console.log("connection establishment Success-");
+        createTables(connection, callback);
+        // Release the connection back to the pool when done
+        connection.release();
       }
-      // Release the connection back to the pool when done
-      connection.release();
-      callback(null);
     });
   },
   get: () => {
     // Return the pool for direct query execution if needed
     return pool;
-  }
+  },
 };
 
+function createTables(connection, callback) {
+  // admin table
+  connection.query(
+    `
+      CREATE TABLE IF NOT EXISTS adminTable 
+        ( 
+          ID INT PRIMARY KEY AUTO_INCREMENT,
+          NAME VARCHAR(255),
+          EMAIL VARCHAR(255) UNIQUE, 
+          PASSKEY VARCHAR(255)
+        )
+      `,
+    (error) => {
+      if (error) {
+        console.log(error);
+        callback(error);
+      } else {
+        console.log(`adminTable created successfully`);
 
+        // user table
+        connection.query(
+          `CREATE TABLE IF NOT EXISTS userTable (
+           ID INT PRIMARY KEY AUTO_INCREMENT ,
+           NAME VARCHAR(255),
+           EMAIL VARCHAR(255) UNIQUE,
+           GENDER VARCHAR(255)
+           )
+            AUTO_INCREMENT=1000;
+         `,
+          (error) => {
+            if (error) {
+              console.log(error);
+              callback(error);
+            } else {
+              console.log(`userTable created successfully`);
+
+              // Office address
+              connection.query(
+                `CREATE TABLE IF NOT EXISTS officeAddressTable(
+                ID INT PRIMARY KEY AUTO_INCREMENT,
+                CITY VARCHAR(255),
+                PIN INT,
+                FOREIGN KEY(ID) REFERENCES userTable(ID)
+              )
+              AUTO_INCREMENT=1000
+              `,
+                (error) => {
+                  if (error) {
+                    console.log(error);
+                    callback(error);
+                  } else {
+                    console.log(`officeAddressTable created successfully`);
+
+                    // home address table
+                    connection.query(
+                      `CREATE TABLE IF NOT EXISTS homeAddressTable(
+                        ID INT PRIMARY KEY AUTO_INCREMENT,
+                        CITY VARCHAR(255),
+                        PIN INT,
+                        FOREIGN KEY(ID) REFERENCES userTable(ID)
+                    )
+                    AUTO_INCREMENT=1000
+                    `,
+                      (error) => {
+                        if (error) {
+                          console.log(error);
+                          callback(error);
+                        } else {
+                          console.log(
+                            `homeAddressTable created successfully`
+                          );
+
+                          // home address table
+                          connection.query(
+                            `CREATE TABLE IF NOT EXISTS currentAddressTable(
+                              ID INT PRIMARY KEY AUTO_INCREMENT,
+                              CITY VARCHAR(255),
+                              PIN INT,
+                              FOREIGN KEY(ID) REFERENCES userTable(ID)
+                          )
+                          AUTO_INCREMENT=1000
+                          `,
+                            (error) => {
+                              if (error) {
+                                console.log(error);
+                                callback(error);
+                              } else {
+                                console.log(
+                                  `current Address created successfully`
+                                );
+
+                                callback(null);
+                              }
+                            }
+                          );
+                          // callback(null);
+                        }
+                      }
+                    );
+                    // callback(null);
+                  }
+                }
+              );
+              // callback(null);
+            }
+          }
+        );
+        // callback(null);
+      }
+    }
+  );
+}
