@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
 const PORT = 3000;
+const db = require("./connection");
+const opepration = require('./model');
 
 app.use(express.json()); // readaing the JSOn body
 app.use(express.urlencoded({ extended: true }));
@@ -15,9 +17,10 @@ const {
   deleteUser,
   findUserByPinCode,
   getAdminDetails,
-} = require("./model");
+} = require("./controller");
 const { request } = require("https");
 const { json } = require("stream/consumers");
+const { resolve } = require("path");
 
 // Middleware for Admin Verification
 const verifyAdmin = async (req, res, next) => {
@@ -29,6 +32,7 @@ const verifyAdmin = async (req, res, next) => {
     let getAdmin = await getAdminDetails(credential);
 
     if (getAdmin) {
+      console.log('logged iN');
       next();
     } else {
       res.status(401).send("Unauthorized: Check Username or Password.");
@@ -38,9 +42,17 @@ const verifyAdmin = async (req, res, next) => {
   }
 };
 
+// SERVER STARTING FUNCTION
 app.listen(PORT, () => {
   console.log(`Server Started Successfully on ${PORT}`);
 });
+
+// DB CONNECTION
+db.connectDB((err) => {
+  if (err) console.log(err);
+    console.log("DB Connected");
+})
+// opepration.create();
 
 // HOME ROUTE
 app.get("/", (req, res) => {
@@ -55,7 +67,6 @@ app.post("/admin", async(req, res) => {
   } catch (error) {
     res.send(error);
   }
-
 });
 
 //USERS ROUTE -GET METHOD
@@ -72,8 +83,9 @@ app.get("/users", verifyAdmin, async (req, res) => {
 //CREATE USER ROUTE- POST METHOD-
 app.post("/user", verifyAdmin, async (req, res) => {
   try {
-    await createUser(req.body);
-    res.send("user successfully created with user with user ID ");
+    const response = await createUser(req.body);
+      let userId=response.id;
+      res.send("user successfully created with user with user ID "+userId);
   } catch (error) {
     res.status(400).send(error);
   }
