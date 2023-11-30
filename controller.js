@@ -4,7 +4,7 @@ let userId = 1000;
 const { response } = require('express');
 const db  = require('./model');
 
-//CREATE ADMIN FUNCTION
+//----------------CREATE ADMIN FUNCTION-----------------
 function createAdmin(admin) {
   return new Promise(async (resolve, reject) => { 
     try {
@@ -26,8 +26,33 @@ function createAdmin(admin) {
 function createUser(user) {
   return new Promise((resolve, reject) => {
     try {
-      let newUser = { id: userId++, ...user };
-      users.push(newUser);
+      let newUser = { id: userId++, name : user.name, email: user.email, gender: user.gender };
+
+      console.log(newUser);
+      
+      if(user.address){
+        var addressTypes = user.address
+      }else{
+        var addressTypes = [];
+      }
+      let [homeAddress] = addressTypes.filter( address => address.type === 'HomeAddress')
+      .map((address) => {
+        return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
+      });
+      console.log("homeaddress: ",homeAddress);
+
+      const [officeAddress] = addressTypes.filter(address => address.type == 'OfficeAddress')
+      .map((address) => {
+        return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
+      });
+      console.log("officeAddress: ",officeAddress);
+
+      const [currentAddress] = addressTypes.filter(address => address.type == 'CurrentAddress')
+      .map((address) => {
+        return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
+      });
+      console.log("currentAddress: ",currentAddress);
+      
       // console.log(newUser);
       resolve(newUser);
     } catch (error) {
@@ -37,7 +62,7 @@ function createUser(user) {
   });
 }
 
-// SHOW ALL USERS
+// SHOW ALL USERS 
 function getAllUsers() {
   return new Promise((resolve, reject) => {
     try {

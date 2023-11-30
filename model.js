@@ -15,7 +15,6 @@ module.exports = {
     // insert into adminTable
     insertIntoAdmin : (admin) => {
         return new Promise((resolve, reject) => {
-            console.log(admin);
             db.get().query(`INSERT INTO ${adminTable} (NAME, EMAIL, PASSKEY) VALUES ('${admin.name}','${admin.email}','${admin.credential}')`, (error, result) => {
                 if (error) {
                     reject(error);
@@ -34,7 +33,6 @@ module.exports = {
                     reject(error);
                 } else {
                     if(result.length > 0) {
-                        console.log(result);
                         if(result[0].passKEY === credential){
                             resolve()
                         }else{
@@ -47,4 +45,11 @@ module.exports = {
             })
         })
     },
+
+    // Create user
+    createUser : (user) => {
+        return new Promise((resolve, reject) => { 
+            
+         })
+    }
 }

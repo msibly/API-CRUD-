@@ -22,8 +22,8 @@ module.exports = {
       } else {
         console.log("connection establishment Success-");
         createTables(connection, callback);
-        // Release the connection back to the pool when done
-        connection.release();
+
+        connection.release();          // Release the connection back to the pool when done
       }
     });
   },
@@ -53,9 +53,9 @@ function createTables(connection, callback) {
         console.log(`adminTable created successfully`);
 
         // user table
-        connection.query(
+        connection.query(                                             //user table
           `CREATE TABLE IF NOT EXISTS userTable (
-           ID INT PRIMARY KEY AUTO_INCREMENT ,
+           ID INT PRIMARY KEY,
            NAME VARCHAR(255),
            EMAIL VARCHAR(255) UNIQUE,
            GENDER VARCHAR(255)
@@ -70,9 +70,9 @@ function createTables(connection, callback) {
               console.log(`userTable created successfully`);
 
               // Office address
-              connection.query(
+              connection.query(                                             //office address
                 `CREATE TABLE IF NOT EXISTS officeAddressTable(
-                ID INT PRIMARY KEY AUTO_INCREMENT,
+                ID INT PRIMARY KEY,
                 CITY VARCHAR(255),
                 PIN INT,
                 FOREIGN KEY(ID) REFERENCES userTable(ID)
@@ -87,9 +87,9 @@ function createTables(connection, callback) {
                     console.log(`officeAddressTable created successfully`);
 
                     // home address table
-                    connection.query(
+                    connection.query(                                             //home address
                       `CREATE TABLE IF NOT EXISTS homeAddressTable(
-                        ID INT PRIMARY KEY AUTO_INCREMENT,
+                        ID INT PRIMARY KEY,
                         CITY VARCHAR(255),
                         PIN INT,
                         FOREIGN KEY(ID) REFERENCES userTable(ID)
@@ -106,9 +106,9 @@ function createTables(connection, callback) {
                           );
 
                           // home address table
-                          connection.query(
+                          connection.query(                                             //current address
                             `CREATE TABLE IF NOT EXISTS currentAddressTable(
-                              ID INT PRIMARY KEY AUTO_INCREMENT,
+                              ID INT PRIMARY KEY,
                               CITY VARCHAR(255),
                               PIN INT,
                               FOREIGN KEY(ID) REFERENCES userTable(ID)

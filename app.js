@@ -56,7 +56,6 @@ db.connectDB((err) => {
     console.log("DB Connected");
   }
 })
-// opepration.create();
 
 // HOME ROUTE
 app.get("/", (req, res) => {
@@ -73,17 +72,6 @@ app.post("/admin", async(req, res) => {
   }
 });
 
-//USERS ROUTE -GET METHOD
-app.get("/users", verifyAdmin, async (req, res) => {
-  try {
-    let users = await getAllUsers();
-      res.send(JSON.stringify(users));
-  } catch (error) {
-    res.send(error);
-  }
-
-});
-
 //CREATE USER ROUTE- POST METHOD-
 app.post("/user", verifyAdmin, async (req, res) => {
   try {
@@ -92,6 +80,17 @@ app.post("/user", verifyAdmin, async (req, res) => {
       res.send("user successfully created with user with user ID "+userId);
   } catch (error) {
     res.status(400).send(error);
+  }
+
+});
+
+//USERS ROUTE -GET METHOD
+app.get("/users", verifyAdmin, async (req, res) => {
+  try {
+    let users = await getAllUsers();
+      res.send(JSON.stringify(users));
+  } catch (error) {
+    res.send(error);
   }
 
 });
