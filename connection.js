@@ -55,7 +55,7 @@ function createTables(connection, callback) {
         // user table
         connection.query(                                             //user table
           `CREATE TABLE IF NOT EXISTS userTable (
-           ID INT PRIMARY KEY,
+           ID INT PRIMARY KEY AUTO_INCREMENT,
            NAME VARCHAR(255),
            EMAIL VARCHAR(255) UNIQUE,
            GENDER VARCHAR(255)

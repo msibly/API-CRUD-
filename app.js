@@ -75,13 +75,11 @@ app.post("/admin", async(req, res) => {
 //CREATE USER ROUTE- POST METHOD-
 app.post("/user", verifyAdmin, async (req, res) => {
   try {
-    const response = await createUser(req.body);
-      let userId=response.id;
-      res.send("user successfully created with user with user ID "+userId);
+    const insertedId = await createUser(req.body);
+      res.send("user successfully created with user with user ID "+insertedId);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send(error.message);
   }
-
 });
 
 //USERS ROUTE -GET METHOD

@@ -1,6 +1,5 @@
 const admins = [];
 let users = [];
-let userId = 1000;
 const { response } = require('express');
 const db  = require('./model');
 
@@ -24,9 +23,9 @@ function createAdmin(admin) {
 
 //CREATE USER FUNCTION
 function createUser(user) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      let newUser = { id: userId++, name : user.name, email: user.email, gender: user.gender };
+      let newUser = { name : user.name, email: user.email, gender: user.gender };
 
       console.log(newUser);
       
@@ -38,12 +37,11 @@ function createUser(user) {
       
       let [homeAddress] = addressTypes.filter( address => address.type === 'HomeAddress')
       .map((address) => {
-        return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
+        return { 'city': address.city, 'pin': address.pin };
       });
       
       if(!homeAddress){
         homeAddress = {
-          'id' : newUser.id,
         'city' : '',
         'pin' : ''
       }
@@ -52,11 +50,10 @@ function createUser(user) {
 
       let [officeAddress] = addressTypes.filter(address => address.type == 'OfficeAddress')
       .map((address) => {
-        return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
+        return { 'city': address.city, 'pin': address.pin };
       });
       if(!officeAddress){
         officeAddress = {
-          'id' : newUser.id,
         'city' : '',
         'pin' : ''
       }
@@ -65,20 +62,21 @@ function createUser(user) {
 
       let [currentAddress] = addressTypes.filter(address => address.type == 'CurrentAddress')
       .map((address) => {
-        return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
+        return { 'city': address.city, 'pin': address.pin };
       });
       if(!currentAddress){
         currentAddress = {
-          'id' : newUser.id,
         'city' : '',
         'pin' : ''
       }
     }
       console.log("currentAddress: ",currentAddress);
 
-      resolve(newUser);
+      let insertedId= await db.dbCreateUser(newUser,officeAddress,homeAddress,currentAddress);
+      console.log(insertedId);
+      resolve(insertedId);
     } catch (error) {
-      console.error("Error creating user:", error);
+      console.error("Error creating user:", error.message);
       reject(error);
     }
   });
@@ -186,7 +184,6 @@ function getAdminDetails(credential) {
     }
   });
 }
-
 
 module.exports = {
   createAdmin,
