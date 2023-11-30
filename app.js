@@ -21,6 +21,7 @@ const {
 const { request } = require("https");
 const { json } = require("stream/consumers");
 const { resolve } = require("path");
+const { STATUS_CODES } = require("http");
 
 // Middleware for Admin Verification
 const verifyAdmin = async (req, res, next) => {
@@ -29,16 +30,16 @@ const verifyAdmin = async (req, res, next) => {
     credential = credential.substring(6, credential.length);
 
     // Get validate admin deatils from admin database
-    let getAdmin = await getAdminDetails(credential);
-
-    if (getAdmin) {
-      console.log('logged iN');
-      next();
-    } else {
-      res.status(401).send("Unauthorized: Check Username or Password.");
-    }
+    await getAdminDetails(credential)
+    .then(()=>{
+      console.log('logged --- in');
+      next()
+    })
+    .catch((error) => {
+      res.status(403).send(error)
+    })
   } catch (error) {
-    res.status(error.statusCode).send;
+    res.send(error);
   }
 };
 

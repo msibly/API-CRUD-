@@ -1,20 +1,23 @@
 const admins = [];
 let users = [];
 let userId = 1000;
+const { response } = require('express');
+const db  = require('./model');
 
 //CREATE ADMIN FUNCTION
 function createAdmin(admin) {
-  return new Promise((resolve, reject) => { 
+  return new Promise(async (resolve, reject) => { 
     try {
       const credentials = `${admin.email}:${admin.password}`; // Combine username and password
       delete admin.password;
       const base64Credentials = Buffer.from(credentials, 'utf-8').toString('base64'); // Convert to base64
       admin.credential = base64Credentials;
-      admins.push(admin);
+      // admins.push(admin);
+      await db.insertIntoAdmin(admin);
       console.log("Admin created Successfuly");
       resolve(admin);
     } catch (error) {
-      resolve (error);
+      reject(error)
     }
   })
 }
@@ -119,20 +122,24 @@ function deleteUser(userId) {
 
 // Find a valid admin
 function getAdminDetails(credential) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      let getAdmin = admins.find((admin) => {
-        if (admin.credential === credential) {
-          return admin;
-        }
-      });
-      resolve(getAdmin);
-    } catch (error) {
+      const decodedCredentials = Buffer.from(credential, 'base64').toString('utf-8');
+      let [username, password] = decodedCredentials.split(':');
+       await db.verifyAdmin(username,credential)
+       .then((response) => {
+        resolve();
+       }) 
+       .catch((error) => {
+        reject(error);
+       })
+    } 
+    catch (error) {
        reject(error);
     }
-
   });
 }
+
 
 module.exports = {
   createAdmin,

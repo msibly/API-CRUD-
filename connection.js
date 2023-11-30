@@ -43,7 +43,7 @@ function createTables(connection, callback) {
           NAME VARCHAR(255),
           EMAIL VARCHAR(255) UNIQUE, 
           PASSKEY VARCHAR(255)
-        )
+        ) AUTO_INCREMENT=1
       `,
     (error) => {
       if (error) {
