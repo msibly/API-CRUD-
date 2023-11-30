@@ -35,25 +35,47 @@ function createUser(user) {
       }else{
         var addressTypes = [];
       }
+      
       let [homeAddress] = addressTypes.filter( address => address.type === 'HomeAddress')
       .map((address) => {
         return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
       });
+      
+      if(!homeAddress){
+        homeAddress = {
+          'id' : newUser.id,
+        'city' : '',
+        'pin' : ''
+      }
+    }
       console.log("homeaddress: ",homeAddress);
 
-      const [officeAddress] = addressTypes.filter(address => address.type == 'OfficeAddress')
+      let [officeAddress] = addressTypes.filter(address => address.type == 'OfficeAddress')
       .map((address) => {
         return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
       });
+      if(!officeAddress){
+        officeAddress = {
+          'id' : newUser.id,
+        'city' : '',
+        'pin' : ''
+      }
+    }
       console.log("officeAddress: ",officeAddress);
 
-      const [currentAddress] = addressTypes.filter(address => address.type == 'CurrentAddress')
+      let [currentAddress] = addressTypes.filter(address => address.type == 'CurrentAddress')
       .map((address) => {
         return { 'id': newUser.id, 'city': address.city, 'pin': address.pin };
       });
+      if(!currentAddress){
+        currentAddress = {
+          'id' : newUser.id,
+        'city' : '',
+        'pin' : ''
+      }
+    }
       console.log("currentAddress: ",currentAddress);
-      
-      // console.log(newUser);
+
       resolve(newUser);
     } catch (error) {
       console.error("Error creating user:", error);
