@@ -21,13 +21,11 @@ function createAdmin(admin) {
   })
 }
 
-//CREATE USER FUNCTION
+//----------------CREATE USER FUNCTION--------------------------
 function createUser(user) {
   return new Promise(async (resolve, reject) => {
     try {
       let newUser = { name : user.name, email: user.email, gender: user.gender };
-
-      console.log(newUser);
       
       if(user.address){
         var addressTypes = user.address
@@ -46,7 +44,6 @@ function createUser(user) {
         'pin' : ''
       }
     }
-      console.log("homeaddress: ",homeAddress);
 
       let [officeAddress] = addressTypes.filter(address => address.type == 'OfficeAddress')
       .map((address) => {
@@ -58,7 +55,6 @@ function createUser(user) {
         'pin' : ''
       }
     }
-      console.log("officeAddress: ",officeAddress);
 
       let [currentAddress] = addressTypes.filter(address => address.type == 'CurrentAddress')
       .map((address) => {
@@ -70,10 +66,8 @@ function createUser(user) {
         'pin' : ''
       }
     }
-      console.log("currentAddress: ",currentAddress);
 
       let insertedId= await db.dbCreateUser(newUser,officeAddress,homeAddress,currentAddress);
-      console.log(insertedId);
       resolve(insertedId);
     } catch (error) {
       console.error("Error creating user:", error.message);
@@ -84,9 +78,10 @@ function createUser(user) {
 
 // SHOW ALL USERS 
 function getAllUsers() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
-      resolve(users)
+      let allUsers = await db.dbGetAllUsers();
+      resolve(allUsers)
     } catch (error) {
       reject(error);
     }

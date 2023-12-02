@@ -5,7 +5,7 @@ const db = require("./connection");
 const opepration = require('./model');
 
 app.use(express.json()); // readaing the JSOn body
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 const {
   createAdmin,
@@ -85,9 +85,11 @@ app.post("/user", verifyAdmin, async (req, res) => {
 //USERS ROUTE -GET METHOD
 app.get("/users", verifyAdmin, async (req, res) => {
   try {
-    let users = await getAllUsers();
-      res.send(JSON.stringify(users));
+    let allUsers = await getAllUsers();
+    res.setHeader('Content-Type', 'application/json');
+    res.json(allUsers);
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 

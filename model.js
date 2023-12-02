@@ -111,5 +111,18 @@ module.exports = {
       );
     });
   },
+
+//   get all users
+dbGetAllUsers : () => {
+    return new Promise((resolve, reject) => { 
+        db.get().query(`SELECT * FROM ${userTable}`, (error, results) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(results);
+            }
+        })
+     })
+}
 };
  
