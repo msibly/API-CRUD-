@@ -1,12 +1,14 @@
 const { create } = require("domain");
 const db = require("./connection");
 const { error } = require("console");
+const { json } = require("stream/consumers");
 
 const userTable = "userTable";
 const adminTable = "adminTable";
 const officeAddressTable = "officeAddressTable";
 const homeAddressTable = "homeAddressTable";
 const currentAddressTable = "currentAddressTable";
+
 
 //insert into  admin table
 
@@ -123,6 +125,64 @@ dbGetAllUsers : () => {
             }
         })
      })
-}
+},
+
+// get user by user id
+
+getUserById : (userId) => {
+  return new Promise((resolve, reject) => { 
+      // db.get().query(`SELECT * FROM ${userTable} WHERE ID = ${userId}`, (error, results) => {
+      //     if (error) {
+      //         reject(error);
+      //     } else {
+      //         resolve(results);
+      //     }
+      // })
+      db.get().query(
+        `
+        SELECT
+        u.id,
+        u.name,
+        u.email,
+        u.gender,
+        JSON_OBJECT(
+          'city', ha.city,
+          'pin', ha.pin
+          ) AS HomeAddress,
+        JSON_OBJECT(
+          'city', oa.city,
+          'pin', oa.pin
+          ) AS OfficeAddress,
+        JSON_OBJECT(
+          'city', ca.city,
+          'pin', ca.pin
+          ) AS CurrentAddress
+    FROM
+        ${userTable} u
+    LEFT JOIN
+        ${homeAddressTable} ha ON u.id = ha.id
+    LEFT JOIN
+        ${officeAddressTable} oa ON u.id = oa.id
+    LEFT JOIN
+        ${currentAddressTable} ca ON u.id = ca.id
+    WHERE
+        u.id = ${userId}
+        `
+        ,(error,results) => {
+          if(error) {
+            console.log(error);
+            reject(error)
+          }else{
+            results.forEach(result => {
+              result.HomeAddress = JSON.parse(result.HomeAddress);
+              result.OfficeAddress = JSON.parse(result.OfficeAddress);
+              result.CurrentAddress = JSON.parse(result.CurrentAddress);
+          });
+            resolve(results);
+          }
+      })
+   })
+},
+
 };
  

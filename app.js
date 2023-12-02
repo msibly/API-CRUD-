@@ -86,7 +86,6 @@ app.post("/user", verifyAdmin, async (req, res) => {
 app.get("/users", verifyAdmin, async (req, res) => {
   try {
     let allUsers = await getAllUsers();
-    res.setHeader('Content-Type', 'application/json');
     res.json(allUsers);
   } catch (error) {
     console.log(error);
@@ -94,19 +93,19 @@ app.get("/users", verifyAdmin, async (req, res) => {
   }
 });
 
-// FIND USER BY PINCODE
-app.get("/user/address/:pinCode", verifyAdmin, (req, res) => {
-  let user = findUserByPinCode(req.params.pinCode);
-  if (user) {
-    res.send(JSON.stringify(user));
+//USER FIND BY USER ID PARAMS ROUTE (/user/1000)
+app.get("/user/:userId", verifyAdmin, async (req, res) => {
+  let user = await findUserByUserId(parseInt(req.params.userId));
+  if (user.length!=0) {
+    res.status(200).json(user);
   } else {
     res.send("No users found");
   }
 });
 
-//USER FIND BY USER ID PARAMS ROUTE (/user/1000)
-app.get("/user/:userId", verifyAdmin, (req, res) => {
-  let user = findUserByUserId(parseInt(req.params.userId));
+// FIND USER BY PINCODE
+app.get("/user/address/:pinCode", verifyAdmin, (req, res) => {
+  let user = findUserByPinCode(req.params.pinCode);
   if (user) {
     res.send(JSON.stringify(user));
   } else {

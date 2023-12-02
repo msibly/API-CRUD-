@@ -40,8 +40,8 @@ function createUser(user) {
       
       if(!homeAddress){
         homeAddress = {
-        'city' : '',
-        'pin' : ''
+        'city' : null,
+        'pin' : null,
       }
     }
 
@@ -51,8 +51,8 @@ function createUser(user) {
       });
       if(!officeAddress){
         officeAddress = {
-        'city' : '',
-        'pin' : ''
+        'city' : null,
+        'pin' : null,
       }
     }
 
@@ -62,8 +62,8 @@ function createUser(user) {
       });
       if(!currentAddress){
         currentAddress = {
-        'city' : '',
-        'pin' : ''
+        'city' : null,
+        'pin' : null,
       }
     }
 
@@ -89,12 +89,17 @@ function getAllUsers() {
 }
 
 // FIND USER BY USER ID
-function findUserByUserId(keyValue) {
-  let getUser = users.find((user) => {
-    return user.id === keyValue;
-  });
-  return getUser;
-}
+async function findUserByUserId(userId) {
+  return new Promise(async (resolve, reject) => { 
+    
+    try {
+      let user = await db.getUserById(userId);
+      resolve(user);
+    } catch (error) {
+      reject(error);
+    }
+  })
+  }
 
 // FIND USER
 function findUser(key, keyValue) {
@@ -157,7 +162,6 @@ function deleteUser(userId) {
     reject("User not found");
   }
 })
-
 }
 
 // Find a valid admin
