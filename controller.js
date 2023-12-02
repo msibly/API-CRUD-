@@ -173,7 +173,7 @@ function getAdminDetails(credential) {
        .catch((error) => {
         reject(error);
        })
-    } 
+    }
     catch (error) {
        reject(error);
     }

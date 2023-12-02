@@ -92,7 +92,6 @@ app.get("/users", verifyAdmin, async (req, res) => {
     console.log(error);
     res.send(error);
   }
-
 });
 
 // FIND USER BY PINCODE
