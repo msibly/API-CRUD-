@@ -2,6 +2,8 @@ const { create } = require("domain");
 const db = require("./connection");
 const { error } = require("console");
 const { json } = require("stream/consumers");
+const { resolve } = require("path");
+const { rejects } = require("assert");
 
 const userTable = "userTable";
 const adminTable = "adminTable";
@@ -208,7 +210,7 @@ getUserbyKey : (key,keyValue) => {
 },
 
 // get user by key - CITY
-getUserByCity : (keyValue) => {
+getUserByCityOrPincode : (key, keyValue) => {
   return new Promise((resolve, reject) => { 
     try {
     db.get().query(
@@ -218,9 +220,9 @@ getUserByCity : (keyValue) => {
       JOIN homeAddressTable ON userTable.id = homeAddressTable.Id
       JOIN officeAddressTable ON userTable.id = officeAddressTable.Id
       JOIN currentAddressTable ON userTable.id = currentAddressTable.Id
-      WHERE homeAddressTable.city LIKE ?
-        OR officeAddressTable.city LIKE ?
-        OR currentAddressTable.city LIKE ?
+      WHERE homeAddressTable.${key} LIKE ?
+        OR officeAddressTable.${key} LIKE ?
+        OR currentAddressTable.${key} LIKE ?
       `, [`%${keyValue}%`,`%${keyValue}%`,`%${keyValue}%`],
       (error, results) => {
         if (error) {
@@ -239,7 +241,99 @@ getUserByCity : (keyValue) => {
 
 
    })
-}
+},
+
+// update User data
+dbUpdateUser : (userId,datas,upadteKeys,addressData) => {
+  return new Promise(async (resolve, reject) => { 
+    try {
+      console.log('dbUpdateUser',datas[0].email);
+
+           db.get().query(
+            `
+            UPDATE ${userTable} SET EMAIL = ? WHERE ID = ?
+            `, [`${datas[0].email}`,userId],
+            (error, results) => {
+              if (error) {
+                console.log('osome errrrrrror');
+                db.get().rollback();
+                reject (error);
+              } else {
+                console.log(results);
+                resolve(true);
+              }
+            })
+            if(addressData){
+              addressData.forEach( (e) => {
+
+                db.get().query(
+                  `
+                  UPDATE ${e.type}Table SET city  = ?, pin = ? where id = ? 
+                  `, [`${e.city}`,`${e.pin}`,userId],(error,results) => {
+                    if(error){
+                      console.log(error);
+                      reject(error)
+                    }else{
+                      console.log(results);
+                      resolve(true);
+                    }
+                  }
+                  )
+                }
+                  )
+            }else{
+              console.log('undefined');
+            }
+      
+    } catch (error) {
+      reject(error);
+    }
+  }
+)},
+
+deleteUser: (userId) =>{
+  return new Promise((resolve, reject) => { 
+
+    db.get().query(`DELETE FROM ${homeAddressTable} WHERE Id = ?`,userId,(error,results) =>{
+      if(error){
+        console.log(error);
+        reject(error);
+      }else{
+        console.log(results);
+
+            console.log(results);
+        db.get().query(`DELETE FROM ${currentAddressTable} WHERE Id = ?`,userId,(error,results) =>{
+          if(error){
+            reject(error);
+          }else{
+            console.log(results);
+
+            console.log(results);
+            db.get().query(`DELETE FROM ${officeAddressTable} WHERE Id = ?`,userId,(error,results) =>{
+              if(error){
+                reject(error);
+              }else{
+            console.log(results);
+
+                db.get().query("DELETE FROM userTable WHERE Id = ?",userId,(error,results) =>{
+                  if(error){
+                    reject(error);
+                  }else{
+            console.log(results);
+
+                    resolve();
+                  }
+                })
+              }
+            })
+          }
+        })
+      }
+    })
+  })
+    
+    
+  }
 
 };
  

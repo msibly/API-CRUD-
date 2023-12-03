@@ -15,9 +15,10 @@ const {
   findUser,
   updateUser,
   deleteUser,
-  findUserByPinCode,
+  // findUserByPinCode,
   getAdminDetails,
 } = require("./controller");
+
 const { request } = require("https");
 const { json } = require("stream/consumers");
 const { resolve } = require("path");
@@ -103,15 +104,6 @@ app.get("/user/:userId", verifyAdmin, async (req, res) => {
   }
 });
 
-// FIND USER BY PINCODE
-app.get("/user/address/:pinCode", verifyAdmin, (req, res) => {
-  let user = findUserByPinCode(req.params.pinCode);
-  if (user) {
-    res.send(JSON.stringify(user));
-  } else {
-    res.send("No users found");
-  }
-});
 
 // FIND USER BY QUERY - NAME/EMAIL/CITY
 app.get("/user?", verifyAdmin, async (req, res) => {
@@ -131,15 +123,53 @@ app.get("/user?", verifyAdmin, async (req, res) => {
 
 });
 
-// UPDATE USER
-app.put("/user/:userId", verifyAdmin, (req, res) => {
-  let data = req.body;
-  let user = updateUser(req.params.userId, data);
-  if (user) {
+// FIND USER BY PINCODE -req.params.pinCode
+app.get("/user/address/:pinCode", verifyAdmin, async (req, res) => {
+  let user = await findUser('pin',req.params.pinCode)
+  if (user.length!=0) {
     res.send(user);
   } else {
     res.send("No users found");
   }
+});
+
+
+// UPDATE USER
+app.put("/user/:userId", verifyAdmin, async (req, res) => {
+  try{
+    let [...datas] = [req.body];
+    let userId = req.params.userId;
+    let addressData;
+    console.log('----------id--------- \n',userId);
+    console.log('----------datas--------- \n',datas);
+    let [upadteKeys] = datas.map((key) => {
+      return Object.keys(key)
+    })
+    console.log('--------------keys------\n', upadteKeys);
+  
+    if(datas[0].address){
+      [...addressData] = [...datas[0].address]
+      console.log('----------updateData--------- \n',addressData);
+    }
+  
+    let user = await updateUser(userId,datas,upadteKeys,addressData);
+  
+    if (user) {
+      const responseObj = {
+        message: "Successfully updated",
+        user: user
+      };
+      res.json(responseObj);
+    } else {
+      res.send("No users found");
+    }
+    
+
+
+  }catch(error){
+    res.send(error)
+  }
+ 
 });
 
 //USER DELETE ROUTE (/user/?query=queryValue)

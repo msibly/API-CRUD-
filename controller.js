@@ -104,26 +104,30 @@ async function findUserByUserId(userId) {
 // FIND USER
 function findUser(key, keyValue) {
   return new Promise(async (resolve, reject) => { 
-
+    let flag = true;
+    console.log(key);
     try {
       switch (key) {
-        case 'email': key = 'EMAIL';
+        case 'email' : key = 'EMAIL'; 
           break;
-        case 'name': key = 'UNAME';
+        case 'name' : key = 'UNAME';
           break;
-        case 'gender': key = 'GENDER';
+        case 'gender' : key = 'GENDER';
           break;
-        case 'city': key = 'CITY';
+        case 'city' : key = 'CITY';
+          flag = false; 
           break;
+        case 'pin' : key = 'PIN';
+          flag = false; 
+          break;          
         default: reject('invalid key');
           // break;
       }
-      if(key != 'CITY'){
-        let users = await db.getUserbyKey(key,keyValue);
-        console.log(users);
+      if(flag){
+        let users = await db.getUserbyKey(key,keyValue); //gte users by name , email, or gender (only look into usertable)
         resolve(users)
       }else{
-        let users = await db.getUserByCity(keyValue)
+        let users = await db.getUserByCityOrPincode(key,keyValue)  //gte users by city or pincode (look into addressTables by merging it with userTable)
         resolve(users)
       }
 
@@ -134,57 +138,58 @@ function findUser(key, keyValue) {
 }
 
 // FIND USER
-function findUserByPinCode(keyValue) {
-  keyValue = parseInt(keyValue);
-  let getUser = users.find((person) =>
-    person.address.find((addr) => {
-      if (addr.pin === keyValue) {
-        return person;
-      }
-    })
-  );
-  return getUser;
-}
+// function findUserByPinCode(keyValue) {
+//   keyValue = parseInt(keyValue);
+//   let getUser = users.find((person) =>
+//     person.address.find((addr) => {
+//       if (addr.pin === keyValue) {
+//         return person;
+//       }
+//     })
+//   );
+//   return getUser;
+// }
 
 // UPDATE USER
-function updateUser(userId, userDetails) {
+function updateUser(userId,datas,upadteKeys,addressData) {
   userId = parseInt(userId);
-  users = users.map((element) => {
-    if (element.id === userId) {
-      return { ...element, ...userDetails };
-    } else {
-      return { ...element };
+
+
+
+  return new Promise(async (resolve, reject) => { 
+    try {
+      
+      let status = await db.dbUpdateUser(userId,datas,upadteKeys,addressData)
+      if(status){
+        let user = await db.getUserById(userId)
+        resolve(user)
+      }else{
+        reject('update error')
+      }
+      resolve(user)
+    } catch (error) {
+      reject(error)
     }
-  });
-  let updatedUser = users.find((person) => {
-    if (person.id === userId) {
-      return person;
-    }
-  });
-  return updatedUser;
+   })
+
+
+
+
+
+
 }
 
 // DELETE USER
 function deleteUser(userId) {
-  return new Promise((resolve, reject) => {  
-  userId = parseInt(userId);
-  let indexToRemove = -1;
-
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].id === userId) {
-      indexToRemove = i;
-      break;
-    }
-  }
-
-  if (indexToRemove !== -1) {
-    users.splice(indexToRemove, 1);
-    console.log("User deleted successfully");
-    resolve();
-  } else {
-    console.log("User not found");
-    reject("User not found");
-  }
+  return new Promise(async (resolve, reject) => {  
+    await db.deleteUser(userId)
+    .then(()=>{
+      resolve()
+    })
+    .catch(()=>{
+      reject()
+    })
+    
 })
 }
 
@@ -213,7 +218,7 @@ module.exports = {
   createUser,
   getAllUsers,
   findUserByUserId,
-  findUserByPinCode,
+  // findUserByPinCode,
   findUser,
   updateUser,
   deleteUser,
