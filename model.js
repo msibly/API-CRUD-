@@ -17,7 +17,7 @@ module.exports = {
   insertIntoAdmin: (admin) => {
     return new Promise((resolve, reject) => {
       db.get().query(
-        `INSERT INTO ${adminTable} (NAME, EMAIL, PASSKEY) VALUES ('${admin.name}','${admin.email}','${admin.credential}')`,
+        `INSERT INTO ${adminTable} (ADNAME, EMAIL, PASSKEY) VALUES ('${admin.name}','${admin.email}','${admin.credential}')`,
         (error, result) => {
           if (error) {
             reject(error);
@@ -38,8 +38,9 @@ module.exports = {
           if (error) {
             reject(error);
           } else {
-            if (result.length > 0) {
-              if (result[0].passKEY === credential) {
+            if (result.length!= 0) {
+              if (result[0].PASSKEY === credential) {
+                console.log('admin verified');
                 resolve();
               } else {
                 reject("password missmatch");
@@ -59,7 +60,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       db.get().query(
         `
-      INSERT INTO ${userTable} ( NAME, EMAIL, GENDER) VALUES (?, ?, ?)
+      INSERT INTO ${userTable} ( UNAME, EMAIL, GENDER) VALUES (?, ?, ?)
       `,
         [user.name, user.email, user.gender],
         (error, results) => {
@@ -131,18 +132,11 @@ dbGetAllUsers : () => {
 
 getUserById : (userId) => {
   return new Promise((resolve, reject) => { 
-      // db.get().query(`SELECT * FROM ${userTable} WHERE ID = ${userId}`, (error, results) => {
-      //     if (error) {
-      //         reject(error);
-      //     } else {
-      //         resolve(results);
-      //     }
-      // })
       db.get().query(
         `
         SELECT
         u.id,
-        u.name,
+        u.uname,
         u.email,
         u.gender,
         JSON_OBJECT(
@@ -183,6 +177,69 @@ getUserById : (userId) => {
       })
    })
 },
+
+// find user by key
+getUserbyKey : (key,keyValue) => {
+  return new Promise((resolve, reject) => { 
+    console.log(key,keyValue);
+    db.get().query(
+      `
+      SELECT * FROM ${userTable} WHERE ${key} LIKE ?
+      `, [`%${keyValue}%`],
+      (error,results) => {
+        if(error){
+          reject(error);
+        }else{
+          results = results.map(row => {
+            return {
+              ID: row.ID,
+              UNAME: row.UNAME,
+              EMAIL: row.EMAIL,
+              GENDER: row.GENDER
+            };
+          });
+          console.log(results);
+          // results = JSON.parse(results);
+          resolve(results);
+        }
+      }
+    )
+   })
+},
+
+// get user by key - CITY
+getUserByCity : (keyValue) => {
+  return new Promise((resolve, reject) => { 
+    try {
+    db.get().query(
+      `
+      SELECT userTable.*
+      FROM userTable
+      JOIN homeAddressTable ON userTable.id = homeAddressTable.Id
+      JOIN officeAddressTable ON userTable.id = officeAddressTable.Id
+      JOIN currentAddressTable ON userTable.id = currentAddressTable.Id
+      WHERE homeAddressTable.city LIKE ?
+        OR officeAddressTable.city LIKE ?
+        OR currentAddressTable.city LIKE ?
+      `, [`%${keyValue}%`,`%${keyValue}%`,`%${keyValue}%`],
+      (error, results) => {
+        if (error) {
+          console.log('----------error generated-----------/n',error);
+          reject(error);
+        } else {
+          console.log('----------result generated-----------/n',results);
+          resolve(results);
+        }
+      }
+    )
+
+  } catch (error) {
+      reject(error);
+  }
+
+
+   })
+}
 
 };
  

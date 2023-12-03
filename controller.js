@@ -103,10 +103,34 @@ async function findUserByUserId(userId) {
 
 // FIND USER
 function findUser(key, keyValue) {
-  let getUser = users.find((person) =>
-    person[key].toLowerCase().includes(keyValue.toLowerCase())
-  );
-  return getUser;
+  return new Promise(async (resolve, reject) => { 
+
+    try {
+      switch (key) {
+        case 'email': key = 'EMAIL';
+          break;
+        case 'name': key = 'UNAME';
+          break;
+        case 'gender': key = 'GENDER';
+          break;
+        case 'city': key = 'CITY';
+          break;
+        default: reject('invalid key');
+          // break;
+      }
+      if(key != 'CITY'){
+        let users = await db.getUserbyKey(key,keyValue);
+        console.log(users);
+        resolve(users)
+      }else{
+        let users = await db.getUserByCity(keyValue)
+        resolve(users)
+      }
+
+    } catch (error) {
+      reject(error)
+    }
+   })
 }
 
 // FIND USER

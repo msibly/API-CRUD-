@@ -114,16 +114,21 @@ app.get("/user/address/:pinCode", verifyAdmin, (req, res) => {
 });
 
 // FIND USER BY QUERY - NAME/EMAIL/CITY
-app.get("/user?", verifyAdmin, (req, res) => {
-  const queryParameters = req.query;
-  const [key] = Object.keys(queryParameters); // Assuming there's only one key-value pair in the query parameters
-  const keyValue = queryParameters[key];
-  let user = findUser(key, keyValue);
-  if (user) {
-    res.send(JSON.stringify(user));
-  } else {
-    res.send("No users found");
+app.get("/user?", verifyAdmin, async (req, res) => {
+  try {
+    const queryParameters = req.query;
+    const [key] = Object.keys(queryParameters); // Assuming there's only one key-value pair in the query parameters
+    const keyValue = queryParameters[key];
+    let user = await findUser(key, keyValue);
+    if (user.length!=0) {
+      res.send(user);
+    } else {
+      res.send("No users found");
+    }
+  } catch (error) {
+    res.send(error)
   }
+
 });
 
 // UPDATE USER
@@ -131,7 +136,7 @@ app.put("/user/:userId", verifyAdmin, (req, res) => {
   let data = req.body;
   let user = updateUser(req.params.userId, data);
   if (user) {
-    res.send(JSON.stringify(user));
+    res.send(user);
   } else {
     res.send("No users found");
   }

@@ -40,7 +40,7 @@ function createTables(connection, callback) {
       CREATE TABLE IF NOT EXISTS adminTable 
         ( 
           ID INT PRIMARY KEY AUTO_INCREMENT,
-          NAME VARCHAR(255),
+          ADNAME VARCHAR(255),
           EMAIL VARCHAR(255) UNIQUE, 
           PASSKEY VARCHAR(255)
         ) AUTO_INCREMENT=1
@@ -56,12 +56,12 @@ function createTables(connection, callback) {
         connection.query(                                             //user table
           `CREATE TABLE IF NOT EXISTS userTable (
            ID INT PRIMARY KEY AUTO_INCREMENT,
-           NAME VARCHAR(255),
+           UNAME VARCHAR(255),
            EMAIL VARCHAR(255) UNIQUE,
            GENDER VARCHAR(255)
            )
             AUTO_INCREMENT=1000;
-         `,
+         `, 
           (error) => {
             if (error) {
               console.log(error);
