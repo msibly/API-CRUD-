@@ -105,7 +105,6 @@ async function findUserByUserId(userId) {
 function findUser(key, keyValue) {
   return new Promise(async (resolve, reject) => { 
     let flag = true;
-    console.log(key);
     try {
       switch (key) {
         case 'Id' : key = 'ID';
@@ -153,17 +152,21 @@ function findUser(key, keyValue) {
 // }
 
 // UPDATE USER
-function updateUser(userId,datas,upadteKeys,addressData) {
-  
-  userId = parseInt(userId);
+function updateUser(userId,datas) {
 
   return new Promise(async (resolve, reject) => { 
     try {
+      let addressData;
+      [...datas] = [datas];
+      let [upadteKeys] = datas.map((key) => {
+        return Object.keys(key)
+      })
+      if(datas[0].address){
+        [...addressData] = [...datas[0].address]
+      }
       let status = await db.dbUpdateUser(userId,datas,upadteKeys,addressData);
-      console.log(status);
       if(status){
         let user = await db.getUserById(userId)
-        console.log('--------------',user);
         resolve(user)
       }else{
         reject('update error')
@@ -172,24 +175,23 @@ function updateUser(userId,datas,upadteKeys,addressData) {
       reject(error)
     }
    })
-
-
-
-
-
-
 }
 
 // DELETE USER
 function deleteUser(userId) {
   return new Promise(async (resolve, reject) => {  
-    await db.deleteUser(userId)
-    .then(()=>{
-      resolve()
-    })
-    .catch(()=>{
-      reject()
-    })
+    let user = await db.getUserById(userId);
+    if(user.length!=0){
+      await db.deleteUser(userId)
+      .then(()=>{
+        resolve()
+      })
+      .catch(()=>{
+        reject()
+      })
+    }else{
+      reject('User not found')
+    }
     
 })
 }

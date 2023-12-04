@@ -58,7 +58,6 @@ module.exports = {
 
   // Create user
   dbCreateUser: (user, officeAddress, homeAddress, currentAddress) => {
-    console.log(officeAddress, "\n", homeAddress, "\n", currentAddress);
     return new Promise((resolve, reject) => {
       db.get().query(
         `
@@ -69,7 +68,6 @@ module.exports = {
           if (error) {
             reject(error);
           } else {
-            console.log(results);
             let userId = results.insertId;
             db.get().query(
               `
@@ -80,7 +78,6 @@ module.exports = {
                 if (error) {
                   reject(error);
                 } else {
-                  console.log(results);
                   db.get().query(
                     `
                   INSERT INTO ${homeAddressTable} ( ID, CITY, PIN) VALUES (?, ?, ?)
@@ -90,7 +87,6 @@ module.exports = {
                       if (error) {
                         reject(error);
                       } else {
-                        console.log(results);
                         db.get().query(
                           `
                         INSERT INTO ${currentAddressTable} ( ID, CITY, PIN) VALUES (?, ?, ?)
@@ -100,7 +96,6 @@ module.exports = {
                             if (error) {
                               reject(error);
                             } else {
-                              console.log(results);
                               resolve(userId);
                             }
                           }
@@ -183,7 +178,6 @@ module.exports = {
   // find user by key
   getUserbyKey: (key, keyValue) => {
     return new Promise((resolve, reject) => {
-      console.log(key, keyValue);
       db.get().query(
         `
       SELECT * FROM ${userTable} WHERE ${key} LIKE ?
@@ -200,7 +194,6 @@ module.exports = {
                 GENDER: row.GENDER
               };
             });
-            console.log(results);
             // results = JSON.parse(results);
             resolve(results);
           }
@@ -226,10 +219,8 @@ module.exports = {
       `, [`%${keyValue}%`, `%${keyValue}%`, `%${keyValue}%`],
           (error, results) => {
             if (error) {
-              console.log('----------error generated-----------/n', error);
               reject(error);
             } else {
-              console.log('----------result generated-----------/n', results);
               resolve(results);
             }
           }
@@ -247,43 +238,35 @@ module.exports = {
   dbUpdateUser: (userId, datas, upadteKeys, addressData) => {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log('dbUpdateUser', datas[0].email);
-
         await db.get().query(
           `
             UPDATE ${userTable} SET EMAIL = ? WHERE ID = ?
             `, [`${datas[0].email}`, userId],
           async (error, results) => {
             if (error) {
-              console.log('osome errrrrrror');
               reject(error);
             } else {
               if (addressData) {
                 let updateAddress = addressData.map(async (e) => {
-                  return new Promise((resolve, reject) => { 
+                  return new Promise((resolve, reject) => {
                     db.get().query(
                       `
                     UPDATE ${e.type}Table SET city  =?, pin =? where id =? 
                     `, [`${e.city}`, `${e.pin}`, userId], (error, results) => {
                       if (error) {
-                        console.log(error);
                         reject(error)
                       } else {
-                        console.log(results);
                         resolve(true);
                       }
                     })
-                   })
+                  })
                 })
                 await Promise.all(updateAddress);
                 resolve(true)
-              } else {
-                console.log('undefined');
               }
               resolve(true);
             }
           })
-
       } catch (error) {
         reject(error);
       }
@@ -291,43 +274,23 @@ module.exports = {
     )
   },
 
-  deleteUser: (userId) => {
-    return new Promise((resolve, reject) => {
+  // delete user
 
+  deleteUser: async (userId) => {
+    try {
 
-      db.get().query(`DELETE FROM ${homeAddressTable} WHERE Id = ?`, userId, (error, results) => {
-        if (error) {
-          console.log(error);
-          reject(error);
-        } else {
-          console.log(results);
-          db.get().query(`DELETE FROM ${currentAddressTable} WHERE Id = ?`, userId, (error, results) => {
-            if (error) {
-              reject(error);
-            } else {
-              console.log(results);
+      await db.get().query(`DELETE FROM ${homeAddressTable} WHERE Id = ?`, userId);
 
-              console.log(results);
-              db.get().query(`DELETE FROM ${officeAddressTable} WHERE Id = ?`, userId, (error, results) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  console.log(results);
+      await db.get().query(`DELETE FROM ${currentAddressTable} WHERE Id = ?`, userId);
 
-                  db.get().query("DELETE FROM userTable WHERE Id = ?", userId, (error, results) => {
-                    if (error) {
-                      reject(error);
-                    } else {
-                      console.log(results);
-                      resolve();
-                    }
-                  })
-                }
-              })
-            }
-          })
-        }
-      })
-    })
+      await db.get().query(`DELETE FROM ${officeAddressTable} WHERE Id = ?`, userId);
+
+      await db.get().query("DELETE FROM userTable WHERE Id = ?", userId);
+
+      return Promise.resolve();
+
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 };

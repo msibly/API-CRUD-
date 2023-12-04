@@ -69,7 +69,7 @@ app.post("/admin", async(req, res) => {
     await createAdmin(req.body);
     res.send("admin created");
   } catch (error) {
-    res.send(error);
+    res.status(403).send(error.message);
   }
 });
 
@@ -79,7 +79,7 @@ app.post("/user", verifyAdmin, async (req, res) => {
     const insertedId = await createUser(req.body);
       res.send("user successfully created with user with user ID "+insertedId);
   } catch (error) {
-    res.status(400).send(error.message);
+    res.status(403).send(error.message);
   }
 });
 
@@ -137,27 +137,8 @@ app.get("/user/address/:pinCode", verifyAdmin, async (req, res) => {
 // UPDATE USER
 app.put("/user/:userId", verifyAdmin, async (req, res) => {
   try{
-    let [...datas] = [req.body];
-    let userId = req.params.userId;
-    let addressData;
-    console.log('----------id--------- \n',userId);
-    console.log('----------datas--------- \n',datas);
-    let [upadteKeys] = datas.map((key) => {
-      return Object.keys(key)
-    })
-    console.log('--------------keys------\n', upadteKeys);
-  
-    if(datas[0].address){
-      [...addressData] = [...datas[0].address]
-      console.log('----------updateData--------- \n',addressData);
-    }
-    let findUpdateUser = await findUser('Id',userId);
-    console.log('---------------',findUpdateUser);
-
-    if(findUpdateUser!=0){
-      let user = await updateUser(userId,datas,upadteKeys,addressData);
-    
-      if (user.length!=0) {
+    let user = await updateUser(req.params.userId,req.body);
+  if (user.length!=0) {
         const responseObj = {
           message: "Successfully updated",
           user: user
@@ -166,15 +147,9 @@ app.put("/user/:userId", verifyAdmin, async (req, res) => {
       } else {
         res.send("No users found");
       }
-        }else{
-      res.send("No users found");
-    }
-
-
   }catch(error){
     res.send(error)
   }
- 
 });
 
 //USER DELETE ROUTE (/user/?query=queryValue)
@@ -190,5 +165,5 @@ app.delete("/user/:userId", verifyAdmin, async (req, res) => {
 
 // 404 ERROR
 app.get("*", (req, res) => {
-  res.send("404 Error");
+  res.status(404).send("404 Error");
 });
