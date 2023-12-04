@@ -151,19 +151,24 @@ app.put("/user/:userId", verifyAdmin, async (req, res) => {
       [...addressData] = [...datas[0].address]
       console.log('----------updateData--------- \n',addressData);
     }
-  
-    let user = await updateUser(userId,datas,upadteKeys,addressData);
-  
-    if (user) {
-      const responseObj = {
-        message: "Successfully updated",
-        user: user
-      };
-      res.json(responseObj);
-    } else {
+    let findUpdateUser = await findUser('Id',userId);
+    console.log('---------------',findUpdateUser);
+
+    if(findUpdateUser!=0){
+      let user = await updateUser(userId,datas,upadteKeys,addressData);
+    
+      if (user.length!=0) {
+        const responseObj = {
+          message: "Successfully updated",
+          user: user
+        };
+        res.json(responseObj);
+      } else {
+        res.send("No users found");
+      }
+        }else{
       res.send("No users found");
     }
-    
 
 
   }catch(error){

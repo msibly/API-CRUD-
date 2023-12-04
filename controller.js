@@ -108,6 +108,8 @@ function findUser(key, keyValue) {
     console.log(key);
     try {
       switch (key) {
+        case 'Id' : key = 'ID';
+          break;
         case 'email' : key = 'EMAIL'; 
           break;
         case 'name' : key = 'UNAME';
@@ -152,21 +154,20 @@ function findUser(key, keyValue) {
 
 // UPDATE USER
 function updateUser(userId,datas,upadteKeys,addressData) {
+  
   userId = parseInt(userId);
-
-
 
   return new Promise(async (resolve, reject) => { 
     try {
-      
-      let status = await db.dbUpdateUser(userId,datas,upadteKeys,addressData)
+      let status = await db.dbUpdateUser(userId,datas,upadteKeys,addressData);
+      console.log(status);
       if(status){
         let user = await db.getUserById(userId)
+        console.log('--------------',user);
         resolve(user)
       }else{
         reject('update error')
       }
-      resolve(user)
     } catch (error) {
       reject(error)
     }
